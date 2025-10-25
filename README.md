@@ -120,7 +120,28 @@ This `config.py` file is responsible for securely setting up the connection to t
 **In short:**  
 This file lets you keep your API key private and easily manage your OpenAI connection, so other parts of your code can just use the `client` object without worrying about authentication or configuration.
 
-4. Launched the API using uvicorn so I could have accessto the API docs
+4. Created a `main.py` file to launch the API.
+```python
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from routes.send_messages import router as send_messages_router
+
+app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+app.include_router(send_messages_router)
+```
+
+The code above starts the FastAPI server, adds CORS middleware to allow requests from any origin, and includes your message-sending API routes. CORS (Cross-Origin Resource Sharing) lets browsers safely access resources from different domains. This is important for enabling web apps (on other domains) to call your API without security errors.
+
+5. Launched the API using uvicorn so I could have accessto the API docs
 
 ```bash
 uvicorn routes.main:app --reload
