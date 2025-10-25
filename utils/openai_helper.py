@@ -1,26 +1,28 @@
-import openai
-from typing import Dict, Any
+import logging
+from typing import List, Dict
+from fastapi import HTTPException
+from config import client
 
-def chat_helper(message: str) -> Dict[str, Any]:
-    """
-    Helper function to interact with OpenAI's chat API
-    """
+logger = logging.getLogger(__name__)
+
+async def chat_helper(message: Dict, model: str = 'gpt-5',
+                      system_configuration: str = 'You are a helpful assistant',
+                      message_history: List[Dict] = []):
+    messages = [{'role': 'system', 'content': system_configuration}] + message_history + [message]
+    logger.debug(f'chat_helper - Sending messages: {messages}')
     try:
-        client = openai.OpenAI()
-        
-        response = client.chat.completions.create(
-            model="gpt-3.5-turbo",
-            messages=[
-                {"role": "user", "content": message}
-            ]
+        completion = client.responses.create(
+            model=model,
+            messages=messages
         )
-        
-        return {
-            "success": True,
-            "response": response.choices[0].message.content
+
+        logger.debug({f'chat_helper - Received completion: {completion}'})
+        response_message = {
+            'role': 'assistant',
+            'content': completion.choicrs[0].message,
+            'refusal': None
         }
+        return response_message
     except Exception as e:
-        return {
-            "success": False,
-            "error": str(e)
-        }
+        logger.error(f'chat_helper - Error: {e}')
+        raise HTTPException(status_code=500, detail=str(e))
