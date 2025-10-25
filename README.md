@@ -3,6 +3,7 @@ Building an AI powered backend with FASTAPI and the OpenAI API.
 1. Created a virtual environment to keep the dependencies isolated.
 
 You can recreate the virtual environment by running the following command:
+
 ```bash
 python -m venv fastapi-openai
 source fastapi-openai/bin/activate
@@ -33,15 +34,15 @@ async def chat_helper(message: Dict, model: str = 'gpt-5',
     messages = [{'role': 'system', 'content': system_configuration}] + message_history + [message]
     logger.debug(f'chat_helper - Sending messages: {messages}')
     try:
-        completion = client.responses.create(
+        completion = client.chat.completions.create(
             model=model,
             messages=messages
         )
 
-        logger.debug({f'chat_helper - Received completion: {completion}'})
+        logger.debug(f'chat_helper - Received completion: {completion}')
         response_message = {
             'role': 'assistant',
-            'content': completion.choicrs[0].message,
+            'content': completion.choices[0].message.content,
             'refusal': None
         }
         return response_message
@@ -57,29 +58,33 @@ async def chat_helper(message: Dict, model: str = 'gpt-5',
                       system_configuration: str = 'You are a helpful assistant',
                       message_history: List[Dict] = []):
 ```
+
 This function takes in the user's message, an optional `model`, a `system_configuration` (which sets the assistant's personality), and a `message_history` (to track your previous conversation).
 
 ```python
 messages = [{'role': 'system', 'content': system_configuration}] + message_history + [message]
 ```
+
 Here, it builds the list of messages to send—starting with a "system" message (to set the assistant's behavior), followed by the conversation history and the user's new message.
 
 ```python
-completion = client.responses.create(
+completion = client.chat.completions.create(
     model=model,
     messages=messages
 )
 ```
+
 This line sends your conversation to the OpenAI API using the provided model and receives a response from the assistant.
 
 ```python
 response_message = {
     'role': 'assistant',
-    'content': completion.choicrs[0].message,
+    'content': completion.choices[0].message.content,
     'refusal': None
 }
 return response_message
 ```
+
 After receiving the AI's response, it formats everything neatly into a dictionary, making it easy to use in your app.
 
 If there’s an error—like a problem with the API or your internet connection—this code catches it and raises an HTTP error with details:
@@ -108,9 +113,23 @@ client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 This `config.py` file is responsible for securely setting up the connection to the OpenAI API:
 
-- First, it imports the necessary packages: `openai` for interacting with the API, `os` for environment variable access, and `load_dotenv` for loading variables from a `.env` file.
-- It then loads the environment variables from a `.env` file, which usually contains sensitive information like your OpenAI API key.
-- The last part creates an `OpenAI` client using your secret API key (retrieved securely from the environment), which means you don't have to hard-code the key into your code. This client is then imported and used throughout your application to make requests to OpenAI.
+-   First, it imports the necessary packages: `openai` for interacting with the API, `os` for environment variable access, and `load_dotenv` for loading variables from a `.env` file.
+-   It then loads the environment variables from a `.env` file, which usually contains sensitive information like your OpenAI API key.
+-   The last part creates an `OpenAI` client using your secret API key (retrieved securely from the environment), which means you don't have to hard-code the key into your code. This client is then imported and used throughout your application to make requests to OpenAI.
 
 **In short:**  
 This file lets you keep your API key private and easily manage your OpenAI connection, so other parts of your code can just use the `client` object without worrying about authentication or configuration.
+
+4. Launched the API using uvicorn so I could have accessto the API docs
+
+```bash
+uvicorn routes.main:app --reload
+```
+
+screenshot of the API docs:
+
+![API Docs](./images/api_docs.png)
+
+and then tested the API using Postman. Sent a message to the API and received a response.
+
+![Postman](./images/postman.png)

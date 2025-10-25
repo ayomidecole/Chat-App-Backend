@@ -11,7 +11,7 @@ async def chat_helper(message: Dict, model: str = 'gpt-5',
     messages = [{'role': 'system', 'content': system_configuration}] + message_history + [message]
     logger.debug(f'chat_helper - Sending messages: {messages}')
     try:
-        completion = client.responses.create(
+        completion = client.chat.completions.create(
             model=model,
             messages=messages
         )
@@ -19,7 +19,7 @@ async def chat_helper(message: Dict, model: str = 'gpt-5',
         logger.debug({f'chat_helper - Received completion: {completion}'})
         response_message = {
             'role': 'assistant',
-            'content': completion.choicrs[0].message,
+            'content': completion.choices[0].message.content,
             'refusal': None
         }
         return response_message
