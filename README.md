@@ -9,4 +9,6 @@ source fastapi-openai/bin/activate
 pip install -r requirements.txt
 ```
 
+2. Created a routes folder to keep the routes organized. We then create a file called `__init__.py`. This file is used to tell Python that the routes folder is a package.
+
 ## Learnings
